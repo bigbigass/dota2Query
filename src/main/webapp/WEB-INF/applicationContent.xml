@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+			xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xmlns:p="http://www.springframework.org/schema/p"
+			xmlns:context="http://www.springframework.org/schema/context"
+			xmlns:mvc="http://www.springframework.org/schema/mvc"
+			xmlns:tx="http://www.springframework.org/schema/tx"
+			xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/context
+						http://www.springframework.org/schema/context/spring-context.xsd
+						http://www.springframework.org/schema/mvc
+						http://www.springframework.org/schema/mvc/spring-mvc.xsd
+						http://www.springframework.org/schema/tx
+						http://www.springframework.org/schema/tx/spring-tx.xsd
+						http://mybatis.org/schema/mybatis-spring
+						http://mybatis.org/schema/mybatis-spring.xsd">
+						
+		<!-- mybatis:scan会扫描hrm.dao包里的所有接口当作Spring的bean配置，之后可以进行依赖注入 -->
+		<mybatis:scan base-package="dota2Query.dao"/>
+		<!-- 扫描hrm下所有的java文件把带有spring注解的类注册为bean -->
+	 	<context:component-scan base-package="dota2Query.service"/>
+	 	<context:component-scan base-package="dota2Query.dao"/>
+	 	<context:component-scan base-package="dota2Query.dao.mapper"/>
+	 	<context:component-scan base-package="dota2Query.dao.provider"/>
+	 	<context:component-scan base-package="dota2Query.domain"/>
+		
+		<!-- 使用PropertyOverrideConfigurer后处理器加载数据源参数 -->
+		<context:property-override location="classpath:db.properties"/>
+		
+		<!-- 配置c3p0数据源 -->
+		<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"/>
+		
+		<!-- 配置SqlSessionFactory,用于整合spring的bean -->
+		<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" p:dataSource-ref="dataSource"/>
+		 <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+         <!-- 以sqlSessionFactory为参数传入构造函数中 -->
+         <constructor-arg ref="sqlSessionFactory" />
+         <!-- mybatis执行器，取值范围是SIMPLE/REUSE/BATCH三种类型 -->
+         <constructor-arg value="BATCH" />
+</bean>
+		
+		<!-- JDBC事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" p:dataSource-ref="dataSource"/>
+	<!-- 启用支持annotation注解方式事务管理 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+</beans>
